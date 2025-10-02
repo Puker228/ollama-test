@@ -6,12 +6,32 @@ volumes:
   ollama:
 
 services:
+  ollama-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ollama-backend
+    depends_on:
+      ollama:
+        condition: service_started
+    ports:
+      - "8001:8001"
+    networks:
+      - ollama_network
+
   ollama:
     image: ollama/ollama
     container_name: ollama
     ports:
       - "11434:11434"
     volumes:
-      - ollama:/root/:ollama
+      - ollama:/root/.ollama
     networks:
       - ollama_network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
